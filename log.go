@@ -26,6 +26,9 @@ type Logging struct {
 	DrReceiverLogName   string
 	DrProcessorLogName  string
 	ChargingLogName     string
+	RetryLogName	      string
+	PortalLogName    		string
+	TrxLogName			    string
 	LogThread           string
 	LogFileName         string
 	LogFileErr          string
@@ -62,7 +65,7 @@ func (l *Logging) SetUpLog(appname string, threadlog string, logname string, log
 	viper.SetConfigName("logging")
 
 	// Set the path to look for the configurations file
-	viper.AddConfigPath("/xmp/go/src/" + appname + "/config/")
+	viper.AddConfigPath(appname + "/config/")
 
 	// Enable VIPER to read Environment Variables
 	viper.AutomaticEnv()
@@ -96,6 +99,10 @@ func (l *Logging) SetUpLog(appname string, threadlog string, logname string, log
 	l.DrProcessorLogName = viper.GetString(prefix + ".DRPROCESSOR")
 	l.ChargingLogName = viper.GetString(prefix + ".CHARGINGLOG")
 
+	l.RetryLogName = viper.GetString(prefix + ".RETRY")
+	l.PortalLogName = viper.GetString(prefix + ".PORTAL")
+	l.TrxLogName = viper.GetString(prefix + ".TRX")
+
 	if threadlog != "" {
 		l.LogThread = Concat(threadlog, " ")
 	} else {
@@ -125,6 +132,12 @@ func (l *Logging) SetUpLog(appname string, threadlog string, logname string, log
 			l.LogFileName = l.CmpProcessorLogName
 		case "charginglog":
 			l.LogFileName = l.ChargingLogName
+		case "retry":
+			l.LogFileName = l.RetryLogName
+		case "portal":
+			l.LogFileName = l.PortalLogName
+		case "trx":
+			l.LogFileName = l.TrxLogName
 		default:
 			l.LogFileName = logname
 		}
