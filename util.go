@@ -287,10 +287,21 @@ func Concat(args ...string) string {
 // 4. mod = @string
 func WriteOnFile(data string, file string, append bool, mode os.FileMode) {
 
-	if append {
-		os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, mode)
+	var f *os.File
+	var err error
+
+	if append == true {
+		f, err = os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, mode)
 	} else {
-		os.OpenFile(file, os.O_CREATE|os.O_WRONLY, mode)
+		f, err = os.OpenFile(file, os.O_CREATE|os.O_WRONLY, mode)
+	}
+
+	if err != nil {
+		//log.Println(err)
+	}
+	defer f.Close()
+	if _, err := f.WriteString(data); err != nil {
+		//log.Println(err)
 	}
 
 }
