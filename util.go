@@ -291,10 +291,12 @@ func WriteOnFile(data string, file string, append bool, mod string) {
 			mod = "0644"
 	}
 
+	mode := int(mod)
+
 	if append {
-		os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, mod)
+		os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.FileMode(mode))
 	} else {
-		os.OpenFile(file, os.O_CREATE|os.O_WRONLY, mod)
+		os.OpenFile(file, os.O_CREATE|os.O_WRONLY, os.FileMode(mode))
 	}
 
 }
