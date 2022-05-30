@@ -287,10 +287,6 @@ func Concat(args ...string) string {
 // 4. mod = @string
 func WriteOnFile(data string, file string, append bool, mode os.FileMode) {
 
-	if mod == "" {
-			mod = "0644"
-	}
-
 	if append {
 		os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, mode)
 	} else {
