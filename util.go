@@ -285,18 +285,16 @@ func Concat(args ...string) string {
 // 2. file = @string
 // 3. append = @boolean
 // 4. mod = @string
-func WriteOnFile(data string, file string, append bool, mod string) {
+func WriteOnFile(data string, file string, append bool, mode os.FileMode) {
 
 	if mod == "" {
 			mod = "0644"
 	}
 
-	mode := int(mod)
-
 	if append {
-		os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.FileMode(mode))
+		os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, mode)
 	} else {
-		os.OpenFile(file, os.O_CREATE|os.O_WRONLY, os.FileMode(mode))
+		os.OpenFile(file, os.O_CREATE|os.O_WRONLY, mode)
 	}
 
 }
