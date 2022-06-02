@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"crypto/md5"
+	"encoding/hex"
 )
 
 type Block struct {
@@ -364,4 +366,13 @@ func RemoveTabAndEnter(str string) string {
 	r := space.ReplaceAllString(str, " ")
 
 	return r
+}
+
+func GetMD5(s string) string {
+
+	// Secret key
+	data := md5.Sum([]byte(s))
+	secretKey := hex.EncodeToString(data[:])
+
+	return secretKey
 }
