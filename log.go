@@ -97,6 +97,7 @@ func (l *Logging) SetUpLog(appname string, threadlog string, logname string, log
 	} else {
 		timezone = "Asia/Jakarta"
 	}
+	os.Setenv("TZ", timezone)
 
 	l.BroadcastLogName = viper.GetString(prefix + ".RENEWAL")
 	l.CmpProcessorLogName = viper.GetString(prefix + ".CMP")
