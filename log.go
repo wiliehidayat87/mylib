@@ -235,7 +235,6 @@ func (l *Logging) Write(logLevel string, behaviour bool, logMsg string) {
 		}
 
 		os.Setenv("TZ", timezone)
-
 		f, err := os.OpenFile(fullLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 077)
 		if err != nil {
 			log.Println(err)
@@ -253,8 +252,10 @@ func (l *Logging) Write(logLevel string, behaviour bool, logMsg string) {
 			threadlogging = Concat(GetLogId(), " ")
 		}
 
-		logger := log.New(f, threadlogging, log.LstdFlags)
-		logger.Println(logLevel + " - " + logMsg)
+		threadlogging = Concat(threadlogging, GetDate("2006-01-02 15:04:05"))
+
+		logger := log.New(f, threadlogging, 0)
+		logger.Println(" " + logLevel + " - " + logMsg)
 
 	}
 }
