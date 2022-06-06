@@ -26,14 +26,16 @@ type Logging struct {
 	DrReceiverLogName   string
 	DrProcessorLogName  string
 	ChargingLogName     string
-	RetryLogName	      string
-	PortalLogName    		string
-	TrxLogName			    string
+	RetryLogName        string
+	PortalLogName       string
+	TrxLogName          string
 	LogThread           string
 	LogFileName         string
 	LogFileErr          string
 	LogBehaviour        bool
 }
+
+var timezone string
 
 // Used to define a full path of a log
 func (l *Logging) GetStringPathLog(logName string) string {
@@ -87,7 +89,14 @@ func (l *Logging) SetUpLog(appname string, threadlog string, logname string, log
 	l.AccessErrorLogName = viper.GetString(prefix + ".ERRORLOG")
 	l.AccessLogFormat = viper.GetString(prefix + ".ACCESSLOGFORMAT")
 	l.AccessLogTimeFormat = viper.GetString(prefix + ".ACCESSLOGTIMEFORMAT")
+
 	l.AccessLogTimeZone = viper.GetString(prefix + ".ACCESSLOGTIMEZONE")
+
+	if l.AccessLogTimeZone != "" {
+		timezone = l.AccessLogTimeZone
+	} else {
+		timezone = "Asia/Jakarta"
+	}
 
 	l.BroadcastLogName = viper.GetString(prefix + ".RENEWAL")
 	l.CmpProcessorLogName = viper.GetString(prefix + ".CMP")

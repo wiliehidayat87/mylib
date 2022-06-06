@@ -2,8 +2,10 @@ package mylib
 
 import (
 	"bytes"
+	"crypto/md5"
 	"crypto/tls"
 	b64 "encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -14,8 +16,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"crypto/md5"
-	"encoding/hex"
 )
 
 type Block struct {
@@ -196,16 +196,21 @@ func GetFormatTime(layout string) string {
 	// 2. time hhhh:ii:ss = 15:04:05
 
 	//set timezone,
+	loc, _ := time.LoadLocation(timezone)
+
 	t := time.Now()
-	f := t.Format(layout)
+	f := t.In(loc).Format(layout)
 
 	return f
 }
 
 func GetUniqId() string {
 
+	//set timezone,
+	loc, _ := time.LoadLocation(timezone)
+
 	t := time.Now()
-	var formatId = t.Format("20060102150405.000000")
+	var formatId = t.In(loc).Format("20060102150405.000000")
 	uniqId := strings.Replace(formatId, ".", "", -1)
 
 	return uniqId
@@ -213,8 +218,11 @@ func GetUniqId() string {
 
 func GetLogId() string {
 
+	//set timezone,
+	loc, _ := time.LoadLocation(timezone)
+
 	t := time.Now()
-	var formatId = t.Format("20060102150405")
+	var formatId = t.In(loc).Format("20060102150405")
 	logId := strings.Replace(formatId, ".", "", -1)
 
 	return logId
@@ -222,18 +230,24 @@ func GetLogId() string {
 
 func GetDate(dateFormat string) string {
 
+	//set timezone,
+	loc, _ := time.LoadLocation(timezone)
+
 	t := time.Now()
-	var now = t.Format(dateFormat)
+	var now = t.In(loc).Format(dateFormat)
 
 	return now
 }
 
 func GetYesterday(day time.Duration) string {
 
+	//set timezone,
+	loc, _ := time.LoadLocation(timezone)
+
 	var format = "2006-01-02"
 
 	now := time.Now()
-	var curDate = now.Format(format)
+	var curDate = now.In(loc).Format(format)
 
 	t, _ := time.Parse(format, curDate)
 
@@ -246,16 +260,19 @@ func GetYesterday(day time.Duration) string {
 
 func GetTomorrow(day time.Duration) string {
 
+	//set timezone,
+	loc, _ := time.LoadLocation(timezone)
+
 	var format = "2006-01-02"
 
 	now := time.Now()
-	var curDate = now.Format(format)
+	var curDate = now.In(loc).Format(format)
 
 	t, _ := time.Parse(format, curDate)
 
 	tomorrow := 24 * day
 
-	nano := t.Add(tomorrow * time.Hour).UnixNano()
+	nano := t.In(loc).Add(tomorrow * time.Hour).UnixNano()
 
 	return time.Unix(0, nano).Format(format)
 }
@@ -292,7 +309,7 @@ func WriteOnFile(data string, file string, append bool, mode os.FileMode) {
 	var f *os.File
 	var err error
 
-	if append == true {
+	if append {
 		f, err = os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, mode)
 	} else {
 		f, err = os.OpenFile(file, os.O_CREATE|os.O_WRONLY, mode)
