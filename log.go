@@ -234,6 +234,8 @@ func (l *Logging) Write(logLevel string, behaviour bool, logMsg string) {
 			fullLogPath = l.GetStringPathLog(l.LogFileErr)
 		}
 
+		os.Setenv("TZ", timezone)
+
 		f, err := os.OpenFile(fullLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 077)
 		if err != nil {
 			log.Println(err)
