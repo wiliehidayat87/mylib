@@ -1,6 +1,7 @@
 package mylib
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/md5"
 	"crypto/tls"
@@ -8,6 +9,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net"
 	"net/http"
@@ -392,4 +394,40 @@ func GetMD5(s string) string {
 	secretKey := hex.EncodeToString(data[:])
 
 	return secretKey
+}
+
+func ReadASingleValueInFile(filename string, keyword string) string {
+
+	var path []string
+
+	if _, err := os.Stat(filename); err == nil {
+
+		file, err := os.Open(filename)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+
+		scanner := bufio.NewScanner(file)
+
+		for scanner.Scan() {
+
+			line := scanner.Text()
+
+			if strings.Contains(line, keyword) {
+
+				path = strings.Split(line, "=")
+				break
+			}
+
+		}
+
+		if err := scanner.Err(); err != nil {
+			log.Fatal(err)
+		}
+
+	}
+
+	return path[1]
+
 }
