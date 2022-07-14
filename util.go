@@ -279,6 +279,18 @@ func GetTomorrow(day time.Duration) string {
 	return time.Unix(0, nano).Format(format)
 }
 
+func GetDateAdd(format string, day int, month int, year int) string {
+
+	//set timezone,
+	loc, _ := time.LoadLocation(timezone)
+
+	t := time.Now()
+
+	now := t.In(loc).AddDate(year, month, day).Format(format)
+
+	return now
+}
+
 func BytesToString(data []byte) string {
 	return string(data[:])
 }
