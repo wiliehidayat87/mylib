@@ -431,3 +431,21 @@ func ReadASingleValueInFile(filename string, keyword string) string {
 	return path[1]
 
 }
+
+func ContainsInt(i []int, e int) bool {
+	for _, a := range i {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+func ContainsStr(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
