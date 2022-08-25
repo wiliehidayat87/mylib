@@ -3,6 +3,7 @@ package mylib
 import (
 	"bufio"
 	"bytes"
+	"compress/gzip"
 	"crypto/md5"
 	"crypto/tls"
 	b64 "encoding/base64"
@@ -312,8 +313,8 @@ func Concat(args ...string) string {
 	return b.String()
 }
 
-//WriteOnFile function
-//Args:
+// WriteOnFile function
+// Args:
 // 1. data = @string
 // 2. file = @string
 // 3. append = @boolean
@@ -460,4 +461,24 @@ func ContainsStr(s []string, e string) bool {
 		}
 	}
 	return false
+}
+
+func ReadGzFile(filename string) ([]byte, error) {
+	fi, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer fi.Close()
+
+	fz, err := gzip.NewReader(fi)
+	if err != nil {
+		return nil, err
+	}
+	defer fz.Close()
+
+	s, err := ioutil.ReadAll(fz)
+	if err != nil {
+		return nil, err
+	}
+	return s, nil
 }
