@@ -15,6 +15,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
@@ -481,4 +482,16 @@ func ReadGzFile(filename string) ([]byte, error) {
 		return nil, err
 	}
 	return s, nil
+}
+
+func Copy(srcFolder string, destFolder string) bool {
+
+	cpCmd := exec.Command("cp", "-rf", srcFolder, destFolder)
+	err := cpCmd.Run()
+
+	if err == nil {
+		return true
+	} else {
+		return false
+	}
 }
