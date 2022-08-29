@@ -486,7 +486,7 @@ func ReadGzFile(filename string) ([]byte, error) {
 
 func Copy(srcFolder string, destFolder string) bool {
 
-	cpCmd := exec.Command("cp", "-rf", srcFolder, destFolder)
+	cpCmd := exec.Command("cp", "-pa", srcFolder, destFolder)
 	err := cpCmd.Run()
 
 	if err == nil {
