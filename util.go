@@ -281,6 +281,25 @@ func GetTomorrow(day time.Duration) string {
 	return time.Unix(0, nano).Format(format)
 }
 
+func GetYesterdayWithFormat(day time.Duration, formatDate string) string {
+
+	//set timezone,
+	loc, _ := time.LoadLocation(timezone)
+
+	//var format = "2006-01-02"
+
+	now := time.Now()
+	var curDate = now.In(loc).Format(formatDate)
+
+	t, _ := time.Parse(formatDate, curDate)
+
+	yesterday := 24 * day
+
+	nano := t.Add(-yesterday * time.Hour).UnixNano()
+
+	return time.Unix(0, nano).Format(formatDate)
+}
+
 func GetTomorrowWithFormat(day time.Duration, formatDate string) string {
 
 	//set timezone,
