@@ -243,6 +243,25 @@ func GetDate(dateFormat string) string {
 	return now
 }
 
+func GetDateTimeAdd(init string, add int, dateFormat string) string {
+
+	//set timezone,
+	loc, _ := time.LoadLocation(timezone)
+
+	t := time.Now()
+	var now string
+
+	if init == "hour" {
+		now = t.Add(time.Hour * time.Duration(add)).In(loc).Format(dateFormat)
+	} else if init == "minute" {
+		now = t.Add(time.Minute * time.Duration(add)).In(loc).Format(dateFormat)
+	} else if init == "second" {
+		now = t.Add(time.Second * time.Duration(add)).In(loc).Format(dateFormat)
+	}
+
+	return now
+}
+
 func GetYesterday(day time.Duration) string {
 
 	//set timezone,
