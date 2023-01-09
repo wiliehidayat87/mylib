@@ -257,6 +257,12 @@ func GetDateTimeAdd(init string, add int, dateFormat string) string {
 		now = t.Add(time.Minute * time.Duration(add)).In(loc).Format(dateFormat)
 	} else if init == "second" {
 		now = t.Add(time.Second * time.Duration(add)).In(loc).Format(dateFormat)
+	} else if init == "day" {
+		now = t.AddDate(0, 0, add).In(loc).Format(dateFormat)
+	} else if init == "month" {
+		now = t.AddDate(0, 1, 0).In(loc).Format(dateFormat)
+	} else if init == "year" {
+		now = t.AddDate(add, 0, 0).In(loc).Format(dateFormat)
 	}
 
 	return now
