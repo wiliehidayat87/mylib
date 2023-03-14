@@ -140,7 +140,7 @@ func Get(client *http.Client, log Logging, contentType string, url string) (stri
 
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("Content-Type", contentType)
-	req.Close = false
+	req.Close = true
 
 	if err != nil {
 		log.Write("error",
