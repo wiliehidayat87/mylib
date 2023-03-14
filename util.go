@@ -65,7 +65,7 @@ func HttpDial(url string, log Logging) error {
 	return err
 }
 
-func HttpClient(timeout time.Duration) *http.Client {
+func HttpClient(timeout time.Duration, keepAlive time.Duration) *http.Client {
 	//ref: Copy and modify defaults from https://golang.org/src/net/http/transport.go
 	//Note: Clients and Transports should only be created once and reused
 	transport := http.Transport{
@@ -73,7 +73,7 @@ func HttpClient(timeout time.Duration) *http.Client {
 		Dial: (&net.Dialer{
 			// Modify the time to wait for a connection to establish
 			Timeout:   1 * time.Second,
-			KeepAlive: 30 * time.Second,
+			KeepAlive: keepAlive * time.Second,
 		}).Dial,
 		TLSHandshakeTimeout: 10 * time.Second,
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
