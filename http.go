@@ -17,9 +17,7 @@ func HttpDial(url string) error {
 	timeout := 10 * time.Second
 	conn, err := net.DialTimeout("tcp", url, timeout)
 	if err != nil {
-		fmt.Println(
-			fmt.Sprintf("Site unreachable : %s, error: %#v", url, err),
-		)
+		fmt.Printf("Site unreachable : %s, error: %#v\n", url, err)
 	}
 	defer conn.Close()
 
