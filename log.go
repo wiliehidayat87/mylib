@@ -14,15 +14,19 @@ import (
 // returns :
 // 1. @Logging -> struct interface
 
-func (l *Utils) InitLog(Log Utils) {
+func InitLog(Log Utils) *Utils {
+
+	var l Utils
 
 	l.AccessLogFormat = Log.AccessLogFormat
 	l.AccessLogTimeFormat = Log.AccessLogTimeFormat
 	l.LogPath = Log.LogPath
-	l.LogLevel = Log.LogLevel
+	l.LogLevelInit = Log.LogLevelInit
 	l.TimeZone = Log.TimeZone
 
 	os.Setenv("TZ", Log.TimeZone)
+
+	return &l
 }
 
 func (l *Utils) SetUpLog(Log Utils) {
@@ -76,11 +80,11 @@ func (l *Utils) Write(logLevel string, logMsg string) {
 		level = 3
 	}
 
-	if l.LogLevel == 0 {
+	if l.LogLevelInit == 0 {
 
 		allowLogging = true
 
-	} else if l.LogLevel == 1 {
+	} else if l.LogLevelInit == 1 {
 
 		if level == 1 {
 			allowLogging = true
@@ -88,7 +92,7 @@ func (l *Utils) Write(logLevel string, logMsg string) {
 			allowLogging = false
 		}
 
-	} else if l.LogLevel == 2 {
+	} else if l.LogLevelInit == 2 {
 
 		if level == 1 || level == 2 {
 			allowLogging = true
@@ -96,7 +100,7 @@ func (l *Utils) Write(logLevel string, logMsg string) {
 			allowLogging = false
 		}
 
-	} else if l.LogLevel == 3 {
+	} else if l.LogLevelInit == 3 {
 
 		allowLogging = false
 
