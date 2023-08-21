@@ -5,19 +5,14 @@ import (
 	"bytes"
 	"compress/gzip"
 	"crypto/md5"
-	"crypto/tls"
 	b64 "encoding/base64"
 	"encoding/hex"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"math/rand"
-	"net"
-	"net/http"
 	"os"
 	"os/exec"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -48,134 +43,7 @@ func (tcf Block) Do() {
 	tcf.Try()
 }
 
-func HttpDial(url string, log Logging) error {
-	timeout := 10 * time.Second
-	conn, err := net.DialTimeout("tcp", url, timeout)
-	if err != nil {
-
-		log.Write("error",
-			true,
-			fmt.Sprintf("Site unreachable : %s, error: %#v", url, err),
-		)
-
-	}
-
-	defer conn.Close()
-
-	return err
-}
-
-func HttpClient(timeout time.Duration, keepAlive time.Duration, useKeepAlive bool) *http.Client {
-	//ref: Copy and modify defaults from https://golang.org/src/net/http/transport.go
-	//Note: Clients and Transports should only be created once and reused
-	transport := http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		Dial: (&net.Dialer{
-			// Modify the time to wait for a connection to establish
-			Timeout:   1 * time.Second,
-			KeepAlive: keepAlive * time.Second,
-		}).Dial,
-		TLSHandshakeTimeout: 10 * time.Second,
-		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
-		DisableKeepAlives:   useKeepAlive,
-	}
-
-	client := http.Client{
-		Transport: &transport,
-		Timeout:   timeout * time.Second,
-	}
-
-	return &client
-}
-
-func Post(client *http.Client, log Logging, headers map[string]string, url string, bodyRequest []byte) (string, string, error) {
-
-	startTime, _ := strconv.Atoi(GetLogId())
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(bodyRequest))
-
-	if len(headers) != 0 {
-		for k, v := range headers {
-
-			req.Header.Set(k, v)
-		}
-	}
-
-	req.Close = false
-
-	if err != nil {
-		log.Write("error",
-			false,
-			fmt.Sprintf("Error Occured : %#v", err),
-		)
-	}
-
-	response, err := client.Do(req)
-	if err != nil {
-		log.Write("error",
-			false,
-			fmt.Sprintf("Error sending request to API endpoint : %#v", err),
-		)
-	}
-
-	// Close the connection to reuse it
-	defer response.Body.Close()
-
-	responseBody, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Write("error",
-			false,
-			fmt.Sprintf("Couldn't parse response body : %#v", err),
-		)
-	}
-
-	endTime, _ := strconv.Atoi(GetLogId())
-	elapse := endTime - startTime
-
-	return string(responseBody), strconv.Itoa(elapse), err
-}
-
-func Get(client *http.Client, log Logging, contentType string, url string) (string, string, error) {
-
-	startTime, _ := strconv.Atoi(GetLogId())
-
-	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Set("Content-Type", contentType)
-	req.Close = true
-
-	if err != nil {
-		log.Write("error",
-			false,
-			fmt.Sprintf("Error Occured : %#v", err),
-		)
-	}
-
-	response, err := client.Do(req)
-	if err != nil {
-		log.Write("error",
-			false,
-			fmt.Sprintf("Error sending request to API endpoint : %#v", err),
-		)
-	}
-
-	// Close the connection to reuse it
-	defer response.Body.Close()
-
-	responseBody, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Write("error",
-			false,
-			fmt.Sprintf("Couldn't parse response body : %#v", err),
-		)
-	}
-
-	endTime, _ := strconv.Atoi(GetLogId())
-	elapse := endTime - startTime
-
-	return string(responseBody), strconv.Itoa(elapse), err
-}
-
-func GetFormatTime(layout string) string {
+func (l *Utils) GetFormatTime(layout string) string {
 
 	// Standard GO Constant Format :
 
@@ -201,7 +69,7 @@ func GetFormatTime(layout string) string {
 	// 2. time hhhh:ii:ss = 15:04:05
 
 	//set timezone,
-	loc, _ := time.LoadLocation(timezone)
+	loc, _ := time.LoadLocation(l.TimeZone)
 
 	t := time.Now()
 	f := t.In(loc).Format(layout)
@@ -209,10 +77,10 @@ func GetFormatTime(layout string) string {
 	return f
 }
 
-func GetUniqId() string {
+func (l *Utils) GetUniqId() string {
 
 	//set timezone,
-	loc, _ := time.LoadLocation(timezone)
+	loc, _ := time.LoadLocation(l.TimeZone)
 
 	t := time.Now()
 	var formatId = t.In(loc).Format("20060102150405.000000")
@@ -221,10 +89,10 @@ func GetUniqId() string {
 	return uniqId
 }
 
-func GetLogId() string {
+func (l *Utils) GetLogId() string {
 
 	//set timezone,
-	loc, _ := time.LoadLocation(timezone)
+	loc, _ := time.LoadLocation(l.TimeZone)
 
 	t := time.Now()
 	var formatId = t.In(loc).Format("20060102150405")
@@ -233,10 +101,10 @@ func GetLogId() string {
 	return logId
 }
 
-func GetDate(dateFormat string) string {
+func (l *Utils) GetDate(dateFormat string) string {
 
 	//set timezone,
-	loc, _ := time.LoadLocation(timezone)
+	loc, _ := time.LoadLocation(l.TimeZone)
 
 	t := time.Now()
 	var now = t.In(loc).Format(dateFormat)
@@ -244,10 +112,10 @@ func GetDate(dateFormat string) string {
 	return now
 }
 
-func GetDateTimeAdd(init string, add int, dateFormat string) string {
+func (l *Utils) GetDateTimeAdd(init string, add int, dateFormat string) string {
 
 	//set timezone,
-	loc, _ := time.LoadLocation(timezone)
+	loc, _ := time.LoadLocation(l.TimeZone)
 
 	t := time.Now()
 	var now string
@@ -269,10 +137,10 @@ func GetDateTimeAdd(init string, add int, dateFormat string) string {
 	return now
 }
 
-func GetYesterday(day time.Duration) string {
+func (l *Utils) GetYesterday(day time.Duration) string {
 
 	//set timezone,
-	loc, _ := time.LoadLocation(timezone)
+	loc, _ := time.LoadLocation(l.TimeZone)
 
 	var format = "2006-01-02"
 
@@ -288,10 +156,10 @@ func GetYesterday(day time.Duration) string {
 	return time.Unix(0, nano).Format(format)
 }
 
-func GetTomorrow(day time.Duration) string {
+func (l *Utils) GetTomorrow(day time.Duration) string {
 
 	//set timezone,
-	loc, _ := time.LoadLocation(timezone)
+	loc, _ := time.LoadLocation(l.TimeZone)
 
 	var format = "2006-01-02"
 
@@ -307,10 +175,10 @@ func GetTomorrow(day time.Duration) string {
 	return time.Unix(0, nano).Format(format)
 }
 
-func GetYesterdayWithFormat(day time.Duration, formatDate string) string {
+func (l *Utils) GetYesterdayWithFormat(day time.Duration, formatDate string) string {
 
 	//set timezone,
-	loc, _ := time.LoadLocation(timezone)
+	loc, _ := time.LoadLocation(l.TimeZone)
 
 	//var format = "2006-01-02"
 
@@ -326,10 +194,10 @@ func GetYesterdayWithFormat(day time.Duration, formatDate string) string {
 	return time.Unix(0, nano).Format(formatDate)
 }
 
-func GetTomorrowWithFormat(day time.Duration, formatDate string) string {
+func (l *Utils) GetTomorrowWithFormat(day time.Duration, formatDate string) string {
 
 	//set timezone,
-	loc, _ := time.LoadLocation(timezone)
+	loc, _ := time.LoadLocation(l.TimeZone)
 
 	//var format = "2006-01-02"
 
@@ -345,10 +213,10 @@ func GetTomorrowWithFormat(day time.Duration, formatDate string) string {
 	return time.Unix(0, nano).Format(formatDate)
 }
 
-func GetDateAdd(format string, day int, month int, year int) string {
+func (l *Utils) GetDateAdd(format string, day int, month int, year int) string {
 
 	//set timezone,
-	loc, _ := time.LoadLocation(timezone)
+	loc, _ := time.LoadLocation(l.TimeZone)
 
 	t := time.Now()
 
