@@ -8,7 +8,7 @@ import (
 type (
 	Utils struct {
 		LogPath             string
-		LogLevel            int
+		LogLevelInit        int
 		LogName             string
 		LogOS               *os.File
 		LogThread           string
