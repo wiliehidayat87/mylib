@@ -7,7 +7,7 @@ import (
 	"crypto/md5"
 	b64 "encoding/base64"
 	"encoding/hex"
-	"io/ioutil"
+	"fmt"
 	"log"
 	"math/rand"
 	"os"
@@ -254,28 +254,25 @@ func Concat(args ...string) string {
 // 4. mod = @string
 func WriteOnFile(data string, file string, append bool, mode os.FileMode) {
 
-	var f *os.File
-	var err error
+	var (
+		f *os.File
+	)
 
 	if append {
-		f, err = os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, mode)
+		f, _ = os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, mode)
 	} else {
-		f, err = os.OpenFile(file, os.O_CREATE|os.O_WRONLY, mode)
+		f, _ = os.OpenFile(file, os.O_CREATE|os.O_WRONLY, mode)
 	}
 
-	if err != nil {
-		//log.Println(err)
+	if _, err := f.WriteString(data); err != nil {
+		fmt.Println(err)
 	}
 	defer f.Close()
-	if _, err := f.WriteString(data); err != nil {
-		//log.Println(err)
-	}
-
 }
 
 func ReadOnFile(file string) string {
 
-	content, _ := ioutil.ReadFile(file)
+	content, _ := os.ReadFile(file)
 
 	return string(content)
 }
@@ -409,11 +406,8 @@ func ReadGzFile(filename string) ([]byte, error) {
 	}
 	defer fz.Close()
 
-	s, err := ioutil.ReadAll(fz)
-	if err != nil {
-		return nil, err
-	}
-	return s, nil
+	s := bufio.NewScanner(fz)
+	return s.Bytes(), nil
 }
 
 func Copy(srcFolder string, destFolder string) bool {

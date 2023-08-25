@@ -80,7 +80,7 @@ func (l *Utils) Write(logLevel string, logMsg string) {
 		level = 3
 	}
 
-	if l.LogLevelInit == 0 {
+	if l.LogLevelInit == 0 || l.LogLevelInit > 2 {
 
 		allowLogging = true
 
@@ -100,7 +100,12 @@ func (l *Utils) Write(logLevel string, logMsg string) {
 			allowLogging = false
 		}
 
-	} else if l.LogLevelInit == 3 {
+	} else {
+
+		allowLogging = false
+	}
+
+	if level == 3 {
 
 		allowLogging = false
 
@@ -119,9 +124,6 @@ func (l *Utils) Write(logLevel string, logMsg string) {
 
 		defer f.Close()
 
-	} else {
-
-		allowLogging = false
 	}
 
 	if allowLogging {

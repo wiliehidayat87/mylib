@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptrace"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -17,9 +18,7 @@ func HttpDial(url string) error {
 	timeout := 10 * time.Second
 	conn, err := net.DialTimeout("tcp", url, timeout)
 	if err != nil {
-		fmt.Println(
-			fmt.Sprintf("Site unreachable : %s, error: %#v", url, err),
-		)
+		fmt.Printf("Site unreachable : %s, error: %#v\n", url, err)
 	}
 	defer conn.Close()
 
@@ -147,6 +146,10 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, timeout
 	if len(headers) != 0 {
 		for k, v := range headers {
 
+			if k == "Basic-Auth" {
+				auth := strings.Split(v, ":")
+				req.SetBasicAuth(auth[0], auth[1])
+			}
 			req.Header.Set(k, v)
 		}
 	}
