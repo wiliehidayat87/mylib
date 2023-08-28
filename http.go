@@ -5,10 +5,12 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net"
 	"net/http"
 	"net/http/httptrace"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -220,20 +222,12 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, timeout
 	return respBody, elapseInSec, elapseInMS, err
 }
 
-func (l *Utils) Upload(url string, headers map[string]string, body *os.File, timeout time.Duration) ([]byte, string, string, error) {
+func (l *Utils) Upload(url string, headers map[string]string, extraParams map[string]string, filepath string, timeout time.Duration) {
 
-	start := time.Now()
-
-	var (
-		respBody    []byte
-		elapseInSec string
-		elapseInMS  string
-	)
-
-	httpClient := HttpClient(PHttp{Timeout: timeout, KeepAlive: 1, IsDisableKeepAlive: true})
-
-	req, err := http.NewRequest("POST", url, body)
-	//req.Header.Set("Content-Type", content_type)
+	req, err := l.newfileUploadRequest(url, extraParams, "file", filepath)
+	if err != nil {
+		l.Write("error", fmt.Sprintf("Error writing tmp file : %v, URL : %s, filePath : %s", err, url, filepath))
+	}
 
 	if len(headers) != 0 {
 		for k, v := range headers {
@@ -247,66 +241,52 @@ func (l *Utils) Upload(url string, headers map[string]string, body *os.File, tim
 		}
 	}
 
-	req.Close = true
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		l.Write("error", fmt.Sprintf("Error upload file : %v, URL : %s", err, url))
+	} else {
+		body := &bytes.Buffer{}
+		_, err := body.ReadFrom(resp.Body)
+		if err != nil {
+			l.Write("error", fmt.Sprintf("Error reading response : %v, URL : %s", err, url))
+		}
+		resp.Body.Close()
+
+		if err == nil {
+			l.Write("info", fmt.Sprintf("Success upload URL : %s, status : %d, header : %#v, response : %#v", url, resp.StatusCode, resp.Header, body))
+		}
+	}
+}
+
+func (l *Utils) newfileUploadRequest(uri string, params map[string]string, paramName, path string) (*http.Request, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		l.Write("error", fmt.Sprintf("Failed open file : %v, path : %s", err, path))
+	}
+	defer file.Close()
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
+	if err != nil {
+		l.Write("error", fmt.Sprintf("Failed create form : %v, param name : %s, base_path : %s", err, paramName, filepath.Base(path)))
+		//return nil, err
+	}
+	_, err = io.Copy(part, file)
 
 	if err != nil {
-		l.Write("error",
-			fmt.Sprintf("Error Occured : %#v", err),
-		)
+		l.Write("error", fmt.Sprintf("Failed copy : %v, part : %#v, file : %#v", err, part, file))
 	}
-
-	var (
-		getConn   string
-		dnsStart  string
-		dnsDone   string
-		connStart string
-		connDone  string
-		gotConn   string
-	)
-
-	clientTrace := &httptrace.ClientTrace{
-		GetConn:  func(hostPort string) { getConn = fmt.Sprintf("Starting to create conn : [%s], ", hostPort) },
-		DNSStart: func(info httptrace.DNSStartInfo) { dnsStart = fmt.Sprintf("starting to look up dns : [%s], ", info) },
-		DNSDone:  func(info httptrace.DNSDoneInfo) { dnsDone = fmt.Sprintf("done looking up dns : [%#v], ", info) },
-		ConnectStart: func(network, addr string) {
-			connStart = fmt.Sprintf("starting tcp connection : [%s, %s], ", network, addr)
-		},
-		ConnectDone: func(network, addr string, err error) {
-			connDone = fmt.Sprintf("tcp connection created [%s, %s, %#v], ", network, addr, err)
-		},
-		GotConn: func(info httptrace.GotConnInfo) { gotConn = fmt.Sprintf("conn was reused: [%#v]", info) },
+	for key, val := range params {
+		_ = writer.WriteField(key, val)
 	}
-	clientTraceCtx := httptrace.WithClientTrace(req.Context(), clientTrace)
-	req = req.WithContext(clientTraceCtx)
-
-	response, err := httpClient.Do(req)
+	err = writer.Close()
 	if err != nil {
-		l.Write("error",
-			fmt.Sprintf("Error sending request to API endpoint : %#v", err),
-		)
+		return nil, err
 	}
 
-	// Close the connection to reuse it
-	defer response.Body.Close()
-
-	respBody, err = io.ReadAll(response.Body)
-	if err != nil {
-		l.Write("error",
-			fmt.Sprintf("Couldn't parse response body : %#v", err),
-		)
-	}
-
-	elapse := time.Since(start)
-
-	elapseInSec = fmt.Sprintf("%f", elapse.Seconds())
-	elapseInMS = strconv.FormatInt(elapse.Milliseconds(), 10)
-
-	l.Write("info",
-		fmt.Sprintf("Sending file: %s, Response: %s, Elapse: %s second, %s milisecond, live trace : %s", url, string(respBody), elapseInSec, elapseInMS, Concat(getConn, dnsStart, dnsDone, connStart, connDone, gotConn)),
-	)
-
-	req = nil
-	httpClient = nil
-
-	return respBody, elapseInSec, elapseInMS, err
+	req, err := http.NewRequest("POST", uri, body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	return req, err
 }
