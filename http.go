@@ -246,12 +246,12 @@ func (l *Utils) Upload(url string, headers map[string]string, extraParams map[st
 	if err != nil {
 		l.Write("error", fmt.Sprintf("Error upload file : %v, URL : %s", err, url))
 	} else {
-		body := &bytes.Buffer{}
+		/* body := &bytes.Buffer{}
 		_, err := body.ReadFrom(resp.Body)
 		if err != nil {
 			l.Write("error", fmt.Sprintf("Error reading response : %v, URL : %s", err, url))
-		}
-		resp.Body.Close()
+		} */
+		//resp.Body.Close()
 
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
@@ -259,6 +259,7 @@ func (l *Utils) Upload(url string, headers map[string]string, extraParams map[st
 				fmt.Sprintf("Couldn't parse response body : %#v", err),
 			)
 		}
+		defer resp.Body.Close()
 
 		if err == nil {
 			l.Write("info", fmt.Sprintf("Success upload URL : %s, status : %d, header : %#v, response : %#v", url, resp.StatusCode, resp.Header, string(respBody)))
