@@ -253,8 +253,15 @@ func (l *Utils) Upload(url string, headers map[string]string, extraParams map[st
 		}
 		resp.Body.Close()
 
+		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			l.Write("error",
+				fmt.Sprintf("Couldn't parse response body : %#v", err),
+			)
+		}
+
 		if err == nil {
-			l.Write("info", fmt.Sprintf("Success upload URL : %s, status : %d, header : %#v, response : %#v", url, resp.StatusCode, resp.Header, body))
+			l.Write("info", fmt.Sprintf("Success upload URL : %s, status : %d, header : %#v, response : %#v", url, resp.StatusCode, resp.Header, string(respBody)))
 		}
 	}
 }
