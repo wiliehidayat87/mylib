@@ -262,7 +262,12 @@ func (l *Utils) Upload(url string, headers map[string]string, extraParams map[st
 		defer resp.Body.Close()
 
 		if err == nil {
-			l.Write("info", fmt.Sprintf("Success upload URL : %s, status : %d, header : %#v, response : %#v", url, resp.StatusCode, resp.Header, string(respBody)))
+
+			if resp.StatusCode != 200 {
+				l.Write("error", fmt.Sprintf("Failed upload, URL : %s, status : %d, header : %#v, response : %#v", url, resp.StatusCode, resp.Header, string(respBody)))
+			} else {
+				l.Write("info", fmt.Sprintf("Success upload, URL : %s, status : %d, header : %#v, response : %#v", url, resp.StatusCode, resp.Header, string(respBody)))
+			}
 		}
 	}
 }
