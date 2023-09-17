@@ -52,7 +52,7 @@ func HttpClient(p PHttp) *http.Client {
 	return &client
 }
 
-func (l *Utils) Get(url string, timeout time.Duration) ([]byte, string, string, error) {
+func (l *Utils) Get(url string, timeout time.Duration) ([]byte, string, int, error) {
 
 	start := time.Now()
 
@@ -128,10 +128,10 @@ func (l *Utils) Get(url string, timeout time.Duration) ([]byte, string, string, 
 	req = nil
 	httpClient = nil
 
-	return respBody, elapseInSec, elapseInMS, errHttp
+	return respBody, response.Status, response.StatusCode, errHttp
 }
 
-func (l *Utils) Post(url string, headers map[string]string, body []byte, timeout time.Duration) ([]byte, string, string, error) {
+func (l *Utils) Post(url string, headers map[string]string, body []byte, timeout time.Duration) ([]byte, string, int, error) {
 
 	start := time.Now()
 
@@ -219,7 +219,7 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, timeout
 	req = nil
 	httpClient = nil
 
-	return respBody, elapseInSec, elapseInMS, err
+	return respBody, response.Status, response.StatusCode, err
 }
 
 func (l *Utils) Upload(url string, headers map[string]string, extraParams map[string]string, filepath string, timeout time.Duration) {
