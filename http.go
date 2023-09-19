@@ -122,7 +122,7 @@ func (l *Utils) Get(url string, timeout time.Duration) ([]byte, string, int, err
 	elapseInMS = strconv.FormatInt(elapse.Milliseconds(), 10)
 
 	l.Write("info",
-		fmt.Sprintf("Hit: %s, Response: %s, Elapse: %s second, %s milisecond, live trace : %s", url, string(respBody), elapseInSec, elapseInMS, Concat(getConn, dnsStart, dnsDone, connStart, connDone, gotConn)),
+		fmt.Sprintf("Hit: %s, Response: %s, Status: %s, Status Code: %d, Elapse: %s second, %s milisecond, live trace : %s", url, string(respBody), response.Status, response.StatusCode, elapseInSec, elapseInMS, Concat(getConn, dnsStart, dnsDone, connStart, connDone, gotConn)),
 	)
 
 	req = nil
@@ -213,7 +213,7 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, timeout
 	elapseInMS = strconv.FormatInt(elapse.Milliseconds(), 10)
 
 	l.Write("info",
-		fmt.Sprintf("Hit: %s, Request: %s, Response: %s, Elapse: %s second, %s milisecond, live trace : %s", url, string(body), string(respBody), elapseInSec, elapseInMS, Concat(getConn, dnsStart, dnsDone, connStart, connDone, gotConn)),
+		fmt.Sprintf("Hit: %s, Request: %s, Response: %s, Status: %s, Status Code: %d, Elapse: %s second, %s milisecond, live trace : %s", url, string(body), string(respBody), response.Status, response.StatusCode, elapseInSec, elapseInMS, Concat(getConn, dnsStart, dnsDone, connStart, connDone, gotConn)),
 	)
 
 	req = nil
