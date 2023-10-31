@@ -52,7 +52,7 @@ func HttpClient(p PHttp) *http.Client {
 	return &client
 }
 
-func (l *Utils) Get(url string, timeout time.Duration) ([]byte, string, int, error) {
+func (l *Utils) Get(url string, headers map[string]string, timeout time.Duration) ([]byte, string, int, error) {
 
 	start := time.Now()
 
@@ -66,7 +66,17 @@ func (l *Utils) Get(url string, timeout time.Duration) ([]byte, string, int, err
 	httpClient := HttpClient(PHttp{Timeout: timeout, KeepAlive: 1, IsDisableKeepAlive: true})
 
 	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Set("Content-Type", "x-www-form-urlencoded")
+	if len(headers) != 0 {
+		for k, v := range headers {
+
+			if k == "Basic-Auth" {
+				auth := strings.Split(v, ":")
+				req.SetBasicAuth(auth[0], auth[1])
+			} else {
+				req.Header.Set(k, v)
+			}
+		}
+	}
 	req.Close = true
 
 	if err != nil {
