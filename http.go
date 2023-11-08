@@ -83,6 +83,8 @@ func (l *Utils) Get(url string, headers map[string]string, timeout time.Duration
 		l.Write("error",
 			fmt.Sprintf("Error Occured : %#v", err),
 		)
+
+		return []byte(""), "", 0, err
 	}
 
 	var (
@@ -114,6 +116,8 @@ func (l *Utils) Get(url string, headers map[string]string, timeout time.Duration
 		l.Write("error",
 			fmt.Sprintf("Error sending request to API endpoint : %#v", err),
 		)
+
+		return []byte(""), "", 0, err
 	}
 
 	// Close the connection to reuse it
@@ -174,6 +178,8 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, timeout
 		l.Write("error",
 			fmt.Sprintf("Error Occured : %#v", err),
 		)
+
+		return []byte(""), "", 0, err
 	}
 
 	var (
@@ -215,6 +221,8 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, timeout
 		l.Write("error",
 			fmt.Sprintf("Couldn't parse response body : %#v", err),
 		)
+
+		return []byte(""), "", 0, err
 	}
 
 	elapse := time.Since(start)
