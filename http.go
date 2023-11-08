@@ -17,13 +17,14 @@ import (
 )
 
 // HttpDial (string)
-func HttpDial(url string) error {
-	timeout := 10 * time.Second
+func HttpDial(url string, t time.Duration) error {
+	timeout := t * time.Second
 	conn, err := net.DialTimeout("tcp", url, timeout)
 	if err != nil {
 		fmt.Printf("Site unreachable : %s, error: %#v\n", url, err)
+	} else {
+		defer conn.Close()
 	}
-	defer conn.Close()
 
 	return err
 }
