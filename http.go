@@ -29,6 +29,17 @@ func HttpDial(url string, t time.Duration) error {
 	return err
 }
 
+func HttpDial2(url string, t time.Duration) bool {
+	_, err := http.Get(url)
+	if err != nil {
+		return false
+		//fmt.Printf("%#v", err.Error())
+	} else {
+		return true
+		//fmt.Printf("%d, %s", resp.StatusCode, resp.Status)
+	}
+}
+
 // HttpClient (time.Duration, time.Duration, bool)
 func HttpClient(p PHttp) *http.Client {
 	//ref: Copy and modify defaults from https://golang.org/src/net/http/transport.go
