@@ -7,11 +7,10 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/md5"
-	cr "crypto/rand"
+	"crypto/sha256"
 	b64 "encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"io"
 	"log"
 	"math/rand"
 	"os"
@@ -20,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mergermarket/go-pkcs7"
+	"github.com/xdg-go/pbkdf2"
 )
 
 type Block struct {
@@ -438,58 +437,47 @@ func Shellout(command string) (string, string, error) {
 	return stdout.String(), stderr.String(), err
 }
 
-// Encrypt encrypts plain text string into cipher text string
-func AES256CBCEnc(unencrypted string, secretKey string) (string, error) {
-	key := []byte(secretKey)
-	plainText := []byte(unencrypted)
-	plainText, err := pkcs7.Pad(plainText, aes.BlockSize)
-	if err != nil {
-		return "", fmt.Errorf(`plainText: "%s" has error`, plainText)
-	}
-	if len(plainText)%aes.BlockSize != 0 {
-		err := fmt.Errorf(`plainText: "%s" has the wrong block size`, plainText)
-		return "", err
-	}
-
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return "", err
-	}
-
-	cipherText := make([]byte, aes.BlockSize+len(plainText))
-	iv := cipherText[:aes.BlockSize]
-	if _, err := io.ReadFull(cr.Reader, iv); err != nil {
-		return "", err
-	}
-
-	mode := cipher.NewCBCEncrypter(block, iv)
-	mode.CryptBlocks(cipherText[aes.BlockSize:], plainText)
-
-	return fmt.Sprintf("%x", cipherText), nil
-}
-
-// Decrypt decrypts cipher text string into plain text string
-func AES256CBCDec(encrypted string, secretKey string) (string, error) {
-	key := []byte(secretKey)
-	cipherText, _ := hex.DecodeString(encrypted)
-
+func Aes256Encode(plaintext string, key []byte, iv string, blockSize int) string {
+	bIV := []byte(iv)
+	bPlaintext := PKCS5Padding([]byte(plaintext), blockSize, len(plaintext))
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		panic(err)
 	}
+	ciphertext := make([]byte, len(bPlaintext))
+	mode := cipher.NewCBCEncrypter(block, bIV)
+	mode.CryptBlocks(ciphertext, bPlaintext)
+	return hex.EncodeToString(ciphertext)
+}
 
-	if len(cipherText) < aes.BlockSize {
-		panic("cipherText too short")
+func Aes256Decode(cipherText string, encKey []byte, iv string) (decryptedString string) {
+	bIV := []byte(iv)
+	cipherTextDecoded, err := hex.DecodeString(cipherText)
+	if err != nil {
+		panic(err)
 	}
-	iv := cipherText[:aes.BlockSize]
-	cipherText = cipherText[aes.BlockSize:]
-	if len(cipherText)%aes.BlockSize != 0 {
-		panic("cipherText is not a multiple of the block size")
+
+	block, err := aes.NewCipher(encKey)
+	if err != nil {
+		panic(err)
 	}
 
-	mode := cipher.NewCBCDecrypter(block, iv)
-	mode.CryptBlocks(cipherText, cipherText)
+	mode := cipher.NewCBCDecrypter(block, bIV)
+	mode.CryptBlocks([]byte(cipherTextDecoded), []byte(cipherTextDecoded))
+	return string(cipherTextDecoded)
+}
 
-	cipherText, _ = pkcs7.Unpad(cipherText, aes.BlockSize)
-	return string(cipherText), nil
+func DeriveKey(passphrase string, salt []byte) []byte {
+	// http://www.ietf.org/rfc/rfc2898.txt
+	if salt == nil {
+		salt = make([]byte, 8)
+		// rand.Read(salt)
+	}
+	return pbkdf2.Key([]byte(passphrase), salt, 1000, 32, sha256.New)
+}
+
+func PKCS5Padding(ciphertext []byte, blockSize int, after int) []byte {
+	padding := (blockSize - len(ciphertext)%blockSize)
+	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(ciphertext, padtext...)
 }
