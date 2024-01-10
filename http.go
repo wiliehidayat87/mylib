@@ -67,7 +67,7 @@ func HttpClient(p PHttp) *http.Client {
 	return &client
 }
 
-func (l *Utils) Get(url string, headers map[string]string, timeout time.Duration) ([]byte, string, int, error) {
+func (l *Utils) Get(url string, headers map[string]string, transport PHttp) ([]byte, string, int, error) {
 
 	start := time.Now()
 
@@ -78,7 +78,7 @@ func (l *Utils) Get(url string, headers map[string]string, timeout time.Duration
 		elapseInMS  string
 	)
 
-	httpClient := HttpClient(PHttp{Timeout: timeout, KeepAlive: 1, IsDisableKeepAlive: true})
+	httpClient := HttpClient(transport)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if len(headers) != 0 {
