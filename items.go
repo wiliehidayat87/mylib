@@ -21,5 +21,8 @@ type (
 		Timeout            time.Duration
 		KeepAlive          time.Duration
 		IsDisableKeepAlive bool
+		MaxIdleConns       int
+		IdleConnTimeout    time.Duration
+		DisableCompression bool
 	}
 )

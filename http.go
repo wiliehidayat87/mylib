@@ -54,6 +54,9 @@ func HttpClient(p PHttp) *http.Client {
 		TLSHandshakeTimeout: 10 * time.Second,
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 		DisableKeepAlives:   p.IsDisableKeepAlive,
+		MaxIdleConns:        p.MaxIdleConns,
+		IdleConnTimeout:     p.IdleConnTimeout,
+		DisableCompression:  p.DisableCompression,
 	}
 
 	client := http.Client{
