@@ -160,7 +160,7 @@ func (l *Utils) Get(url string, headers map[string]string, transport PHttp) ([]b
 	return respBody, response.Status, response.StatusCode, errHttp
 }
 
-func (l *Utils) Post(url string, headers map[string]string, body []byte, timeout time.Duration) ([]byte, string, int, error) {
+func (l *Utils) Post(url string, headers map[string]string, body []byte, transport PHttp) ([]byte, string, int, error) {
 
 	start := time.Now()
 
@@ -170,7 +170,7 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, timeout
 		elapseInMS  string
 	)
 
-	httpClient := HttpClient(PHttp{Timeout: timeout, KeepAlive: 1, IsDisableKeepAlive: true})
+	httpClient := HttpClient(transport)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	//req.Header.Set("Content-Type", content_type)
