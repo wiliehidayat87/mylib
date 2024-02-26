@@ -450,21 +450,28 @@ func Aes256Encode(plaintext string, key []byte, iv string, blockSize int) string
 	return hex.EncodeToString(ciphertext)
 }
 
-func Aes256Decode(cipherText string, encKey []byte, iv string) (decryptedString string) {
+func Aes256Decode(cipherText string, encKey []byte, iv string) (string, error) {
+
+	var (
+		err               error
+		cipherTextDecoded []byte
+		block             cipher.Block
+	)
+
 	bIV := []byte(iv)
-	cipherTextDecoded, err := hex.DecodeString(cipherText)
+	cipherTextDecoded, err = hex.DecodeString(cipherText)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	block, err := aes.NewCipher(encKey)
+	block, err = aes.NewCipher(encKey)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	mode := cipher.NewCBCDecrypter(block, bIV)
 	mode.CryptBlocks([]byte(cipherTextDecoded), []byte(cipherTextDecoded))
-	return string(cipherTextDecoded)
+	return string(cipherTextDecoded), nil
 }
 
 func DeriveKey(passphrase string, salt []byte) []byte {
