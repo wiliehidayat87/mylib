@@ -10,6 +10,7 @@ type (
 		LogPath             string
 		LogLevelInit        int
 		LogName             string
+		LogFileName         string
 		LogOS               *os.File
 		LogThread           string
 		AccessLogFormat     string

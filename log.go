@@ -56,7 +56,8 @@ func (l *Utils) GetStringPathLog(logName string) string {
 	}
 
 	// Return log path with modify full path
-	return modLogPath + "/" + l.GetFormatTime("20060102") + ".log"
+	l.LogFileName = l.GetFormatTime("20060102")
+	return modLogPath + "/" + l.LogFileName + ".log"
 }
 
 // Write method
@@ -127,6 +128,16 @@ func (l *Utils) Write(logLevel string, logMsg string) {
 	}
 
 	if allowLogging {
+
+		if l.LogFileName != l.GetFormatTime("20060102") {
+
+			l = InitLog(Utils{
+				LogPath:      l.LogPath,
+				LogLevelInit: l.LogLevelInit,
+				TimeZone:     l.TimeZone,
+			})
+			l.SetUpLog(Utils{LogThread: l.GetUniqId(), LogName: l.LogName})
+		}
 
 		threadlogging := l.LogThread + " " + l.GetFormatTime("2006-01-02 15:04:05")
 
