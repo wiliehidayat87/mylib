@@ -8,6 +8,7 @@ import (
 type (
 	Utils struct {
 		LogPath             string
+		LogFullPath         string
 		LogLevelInit        int
 		LogName             string
 		LogFileName         string

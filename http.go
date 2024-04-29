@@ -95,7 +95,7 @@ func (l *Utils) Get(url string, headers map[string]string, transport PHttp) ([]b
 	req.Close = true
 
 	if err != nil {
-		l.Write("error",
+		l.Write(l.LogName, "error",
 			fmt.Sprintf("Error Occured : %#v", err),
 		)
 
@@ -128,7 +128,7 @@ func (l *Utils) Get(url string, headers map[string]string, transport PHttp) ([]b
 
 	response, err := httpClient.Do(req)
 	if err != nil {
-		l.Write("error",
+		l.Write(l.LogName, "error",
 			fmt.Sprintf("Error sending request to API endpoint : %#v", err),
 		)
 
@@ -140,7 +140,7 @@ func (l *Utils) Get(url string, headers map[string]string, transport PHttp) ([]b
 
 	respBody, err = io.ReadAll(response.Body)
 	if err != nil {
-		l.Write("error",
+		l.Write(l.LogName, "error",
 			fmt.Sprintf("Couldn't parse response body : %#v", err),
 		)
 	}
@@ -150,7 +150,7 @@ func (l *Utils) Get(url string, headers map[string]string, transport PHttp) ([]b
 	elapseInSec = fmt.Sprintf("%f", elapse.Seconds())
 	elapseInMS = strconv.FormatInt(elapse.Milliseconds(), 10)
 
-	l.Write("info",
+	l.Write(l.LogName, "info",
 		fmt.Sprintf("Hit: %s, Response: %s, Status: %s, Status Code: %d, Elapse: %s second, %s milisecond, live trace : %s", url, string(respBody), response.Status, response.StatusCode, elapseInSec, elapseInMS, Concat(getConn, dnsStart, dnsDone, connStart, connDone, gotConn)),
 	)
 
@@ -190,7 +190,7 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, transpo
 	req.Close = true
 
 	if err != nil {
-		l.Write("error",
+		l.Write(l.LogName, "error",
 			fmt.Sprintf("Error Occured : %#v", err),
 		)
 
@@ -223,7 +223,7 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, transpo
 
 	response, err := httpClient.Do(req)
 	if err != nil {
-		l.Write("error",
+		l.Write(l.LogName, "error",
 			fmt.Sprintf("Error sending request to API endpoint : %#v", err),
 		)
 	}
@@ -233,7 +233,7 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, transpo
 
 	respBody, err = io.ReadAll(response.Body)
 	if err != nil {
-		l.Write("error",
+		l.Write(l.LogName, "error",
 			fmt.Sprintf("Couldn't parse response body : %#v", err),
 		)
 
@@ -245,7 +245,7 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, transpo
 	elapseInSec = fmt.Sprintf("%f", elapse.Seconds())
 	elapseInMS = strconv.FormatInt(elapse.Milliseconds(), 10)
 
-	l.Write("info",
+	l.Write(l.LogName, "info",
 		fmt.Sprintf("Hit: %s, Request: %s, Response: %s, Status: %s, Status Code: %d, Elapse: %s second, %s milisecond, live trace : %s", url, string(body), string(respBody), response.Status, response.StatusCode, elapseInSec, elapseInMS, Concat(getConn, dnsStart, dnsDone, connStart, connDone, gotConn)),
 	)
 
@@ -259,7 +259,7 @@ func (l *Utils) Upload(url string, headers map[string]string, extraParams map[st
 
 	req, err := l.newfileUploadRequest(url, extraParams, "file", filepath)
 	if err != nil {
-		l.Write("error", fmt.Sprintf("Error writing tmp file : %v, URL : %s, filePath : %s", err, url, filepath))
+		l.Write(l.LogName, "error", fmt.Sprintf("Error writing tmp file : %v, URL : %s, filePath : %s", err, url, filepath))
 	}
 
 	if len(headers) != 0 {
@@ -277,7 +277,7 @@ func (l *Utils) Upload(url string, headers map[string]string, extraParams map[st
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		l.Write("error", fmt.Sprintf("Error upload file : %v, URL : %s", err, url))
+		l.Write(l.LogName, "error", fmt.Sprintf("Error upload file : %v, URL : %s", err, url))
 	} else {
 		/* body := &bytes.Buffer{}
 		_, err := body.ReadFrom(resp.Body)
@@ -288,7 +288,7 @@ func (l *Utils) Upload(url string, headers map[string]string, extraParams map[st
 
 		respBody, err := io.ReadAll(resp.Body)
 		if err != nil {
-			l.Write("error",
+			l.Write(l.LogName, "error",
 				fmt.Sprintf("Couldn't parse response body : %#v", err),
 			)
 		}
@@ -297,9 +297,9 @@ func (l *Utils) Upload(url string, headers map[string]string, extraParams map[st
 		if err == nil {
 
 			if resp.StatusCode != 200 {
-				l.Write("error", fmt.Sprintf("Failed upload, URL : %s, status : %d, header : %#v, response : %#v", url, resp.StatusCode, resp.Header, string(respBody)))
+				l.Write(l.LogName, "error", fmt.Sprintf("Failed upload, URL : %s, status : %d, header : %#v, response : %#v", url, resp.StatusCode, resp.Header, string(respBody)))
 			} else {
-				l.Write("info", fmt.Sprintf("Success upload, URL : %s, status : %d, header : %#v, response : %#v", url, resp.StatusCode, resp.Header, string(respBody)))
+				l.Write(l.LogName, "info", fmt.Sprintf("Success upload, URL : %s, status : %d, header : %#v, response : %#v", url, resp.StatusCode, resp.Header, string(respBody)))
 			}
 		}
 	}
@@ -308,7 +308,7 @@ func (l *Utils) Upload(url string, headers map[string]string, extraParams map[st
 func (l *Utils) newfileUploadRequest(uri string, params map[string]string, paramName, path string) (*http.Request, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		l.Write("error", fmt.Sprintf("Failed open file : %v, path : %s", err, path))
+		l.Write(l.LogName, "error", fmt.Sprintf("Failed open file : %v, path : %s", err, path))
 	}
 	defer file.Close()
 
@@ -316,13 +316,13 @@ func (l *Utils) newfileUploadRequest(uri string, params map[string]string, param
 	writer := multipart.NewWriter(body)
 	part, err := writer.CreateFormFile(paramName, filepath.Base(path))
 	if err != nil {
-		l.Write("error", fmt.Sprintf("Failed create form : %v, param name : %s, base_path : %s", err, paramName, filepath.Base(path)))
+		l.Write(l.LogName, "error", fmt.Sprintf("Failed create form : %v, param name : %s, base_path : %s", err, paramName, filepath.Base(path)))
 		//return nil, err
 	}
 	_, err = io.Copy(part, file)
 
 	if err != nil {
-		l.Write("error", fmt.Sprintf("Failed copy : %v, part : %#v, file : %#v", err, part, file))
+		l.Write(l.LogName, "error", fmt.Sprintf("Failed copy : %v, part : %#v, file : %#v", err, part, file))
 	}
 	for key, val := range params {
 		_ = writer.WriteField(key, val)

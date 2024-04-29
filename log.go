@@ -64,7 +64,7 @@ func (l *Utils) GetStringPathLog(logName string) string {
 // param :
 // 1. @loglevel ( option : 'info', 'debug', & 'error' ) -> string
 // 2. @logMsg ( a message string appear in a log file ) -> string
-func (l *Utils) Write(logLevel string, logMsg string) {
+func (l *Utils) Write(logName string, logLevel string, logMsg string) {
 
 	var (
 		level        int
@@ -136,7 +136,9 @@ func (l *Utils) Write(logLevel string, logMsg string) {
 				LogLevelInit: l.LogLevelInit,
 				TimeZone:     l.TimeZone,
 			})
-			l.SetUpLog(Utils{LogThread: l.GetUniqId(), LogName: l.LogName})
+			l.SetUpLog(Utils{LogThread: l.GetUniqId(), LogName: logName})
+
+			l.LogFileName = l.GetFormatTime("20060102")
 		}
 
 		threadlogging := l.LogThread + " " + l.GetFormatTime("2006-01-02 15:04:05")
