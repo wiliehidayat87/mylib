@@ -1,6 +1,7 @@
 package mylib
 
 import (
+	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -125,6 +126,7 @@ func (l *Utils) Write(logName string, logLevel string, logMsg string) {
 
 		defer f.Close()
 
+		fmt.Println(logMsg)
 	}
 
 	if allowLogging {
@@ -146,5 +148,6 @@ func (l *Utils) Write(logName string, logLevel string, logMsg string) {
 		logger := log.New(l.LogOS, threadlogging, 0)
 		logger.Println(" " + logLevel + " - " + logMsg)
 
+		fmt.Println(logMsg)
 	}
 }
