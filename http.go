@@ -128,8 +128,9 @@ func (l *Utils) Get(url string, headers map[string]string, transport PHttp) ([]b
 
 	response, err := httpClient.Do(req)
 	if err != nil {
+
 		l.Write(l.LogName, "error",
-			fmt.Sprintf("Error sending request to API endpoint : %#v", err),
+			fmt.Sprintf("Error sending request to API endpoint : %#v, Hit: %s, Response: %s, Status: %s, Status Code: %d, Elapse: %s second, %s milisecond, live trace : %s", err, url, string(respBody), response.Status, response.StatusCode, elapseInSec, elapseInMS, Concat(getConn, dnsStart, dnsDone, connStart, connDone, gotConn)),
 		)
 
 		return []byte(""), "", 0, err
@@ -142,6 +143,10 @@ func (l *Utils) Get(url string, headers map[string]string, transport PHttp) ([]b
 	if err != nil {
 		l.Write(l.LogName, "error",
 			fmt.Sprintf("Couldn't parse response body : %#v", err),
+		)
+
+		l.Write(l.LogName, "error",
+			fmt.Sprintf("Couldn't parse response body : %#v, Hit: %s, Response: %s, Status: %s, Status Code: %d, Elapse: %s second, %s milisecond, live trace : %s", err, url, string(respBody), response.Status, response.StatusCode, elapseInSec, elapseInMS, Concat(getConn, dnsStart, dnsDone, connStart, connDone, gotConn)),
 		)
 	}
 
@@ -223,8 +228,9 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, transpo
 
 	response, err := httpClient.Do(req)
 	if err != nil {
+
 		l.Write(l.LogName, "error",
-			fmt.Sprintf("Error sending request to API endpoint : %#v", err),
+			fmt.Sprintf("Error sending request to API endpoint : %#v, Hit: %s, Request: %s, Response: %s, Status: %s, Status Code: %d, Elapse: %s second, %s milisecond, live trace : %s", err, url, string(body), string(respBody), response.Status, response.StatusCode, elapseInSec, elapseInMS, Concat(getConn, dnsStart, dnsDone, connStart, connDone, gotConn)),
 		)
 	}
 
@@ -233,8 +239,9 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, transpo
 
 	respBody, err = io.ReadAll(response.Body)
 	if err != nil {
+
 		l.Write(l.LogName, "error",
-			fmt.Sprintf("Couldn't parse response body : %#v", err),
+			fmt.Sprintf("Couldn't parse response body : %#v, Hit: %s, Request: %s, Response: %s, Status: %s, Status Code: %d, Elapse: %s second, %s milisecond, live trace : %s", err, url, string(body), string(respBody), response.Status, response.StatusCode, elapseInSec, elapseInMS, Concat(getConn, dnsStart, dnsDone, connStart, connDone, gotConn)),
 		)
 
 		return []byte(""), "", 0, err
