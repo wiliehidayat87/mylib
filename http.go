@@ -165,7 +165,7 @@ func (l *Utils) Get(url string, headers map[string]string, transport PHttp) ([]b
 	return respBody, response.Status, response.StatusCode, errHttp
 }
 
-func (l *Utils) Post(url string, headers map[string]string, body []byte, transport PHttp) ([]byte, string, int, error) {
+func (l *Utils) Post(url string, headers map[string]string, body []byte, transport PHttp) ([]byte, string, int, map[string]string, error) {
 
 	start := time.Now()
 
@@ -173,6 +173,7 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, transpo
 		respBody    []byte
 		elapseInSec string
 		elapseInMS  string
+		attr 		map[string]string
 	)
 
 	httpClient := HttpClient(transport)
@@ -199,7 +200,7 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, transpo
 			fmt.Sprintf("Error Occured : %#v", err),
 		)
 
-		return []byte(""), "", 0, err
+		return []byte(""), "", 0, attr, err
 	}
 
 	var (
@@ -244,7 +245,7 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, transpo
 			fmt.Sprintf("Couldn't parse response body : %#v, Hit: %s, Request: %s, Response: %s, Status: %s, Status Code: %d, Elapse: %s second, %s milisecond, live trace : %s", err, url, string(body), string(respBody), response.Status, response.StatusCode, elapseInSec, elapseInMS, Concat(getConn, dnsStart, dnsDone, connStart, connDone, gotConn)),
 		)
 
-		return []byte(""), "", 0, err
+		return []byte(""), "", 0, attr, err
 	}
 
 	elapse := time.Since(start)
@@ -259,7 +260,11 @@ func (l *Utils) Post(url string, headers map[string]string, body []byte, transpo
 	req = nil
 	httpClient = nil
 
-	return respBody, response.Status, response.StatusCode, err
+	attr = map[string]string{
+		"xsrf-token": response.Header.Get("xsrf-token"),
+	}
+	
+	return respBody, response.Status, response.StatusCode, attr, err
 }
 
 func (l *Utils) Upload(url string, headers map[string]string, extraParams map[string]string, filepath string, timeout time.Duration) {
